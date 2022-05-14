@@ -30,6 +30,10 @@ final class ECDHES implements KeyAgreement
         return ['EC', 'OKP'];
     }
 
+    /**
+     * @param array<string, mixed> $complete_header
+     * @param array<string, mixed> $additional_header_values
+     */
     public function getAgreementKey(
         int $encryptionKeyLength,
         string $algorithm,
@@ -48,6 +52,9 @@ final class ECDHES implements KeyAgreement
 
         $apu = array_key_exists('apu', $complete_header) ? $complete_header['apu'] : '';
         $apv = array_key_exists('apv', $complete_header) ? $complete_header['apv'] : '';
+        if (! is_string($apu) || ! is_string($apv)) {
+            throw new InvalidArgumentException('Invalid APV or APU parameter');
+        }
 
         return ConcatKDF::generate($agreed_key, $algorithm, $encryptionKeyLength, $apu, $apv);
     }
@@ -130,6 +137,8 @@ final class ECDHES implements KeyAgreement
     }
 
     /**
+     * @param array<string, mixed> $additional_header_values
+     *
      * @return JWK[]
      */
     private function getKeysFromPublicKey(JWK $recipient_key, array &$additional_header_values): array
@@ -167,6 +176,8 @@ final class ECDHES implements KeyAgreement
     }
 
     /**
+     * @param array<string, mixed> $complete_header
+     *
      * @return JWK[]
      */
     private function getKeysFromPrivateKeyAndHeader(JWK $recipient_key, array $complete_header): array
@@ -181,6 +192,9 @@ final class ECDHES implements KeyAgreement
         return [$public_key, $private_key];
     }
 
+    /**
+     * @param array<string, mixed> $complete_header
+     */
     private function getPublicKey(array $complete_header): JWK
     {
         if (! isset($complete_header['epk'])) {
@@ -247,8 +261,12 @@ final class ECDHES implements KeyAgreement
         if (! is_array($data) || ! isset($data[1])) {
             throw new InvalidArgumentException('Unable to convert base64 to integer');
         }
+        $input = $data[1];
+        if (! is_string($input)) {
+            throw new InvalidArgumentException('Unable to convert base64 to integer');
+        }
 
-        return BigInteger::fromBase($data[1], 16);
+        return BigInteger::fromBase($input, 16);
     }
 
     private function convertDecToBin(BigInteger $dec): string

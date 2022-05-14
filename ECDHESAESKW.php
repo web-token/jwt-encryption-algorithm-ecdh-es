@@ -16,6 +16,10 @@ abstract class ECDHESAESKW implements KeyAgreementWithKeyWrapping
         return ['EC', 'OKP'];
     }
 
+    /**
+     * @param array<string, mixed> $complete_header
+     * @param array<string, mixed> $additional_header_values
+     */
     public function wrapAgreementKey(
         JWK $recipientKey,
         ?JWK $senderKey,
@@ -38,6 +42,9 @@ abstract class ECDHESAESKW implements KeyAgreementWithKeyWrapping
         return $wrapper::wrap($agreement_key, $cek);
     }
 
+    /**
+     * @param array<string, mixed> $complete_header
+     */
     public function unwrapAgreementKey(
         JWK $recipientKey,
         ?JWK $senderKey,
